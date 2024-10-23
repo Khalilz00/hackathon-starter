@@ -2,13 +2,24 @@ version: '3.8'
 services:
   mongo:
     image: mongo
-  web:
+    ports:
+      - "27017:27017" # Optional if you want to access MongoDB from outside the Docker network
+
+  node-app:
     build: .
     ports:
-     - "8080:8080"
+      - "3000:3000" # Expose the Node.js app on port 3000
     environment:
-     - MONGODB_URI=mongodb://mongo:27017/test
-    links:
-     - mongo
+      - MONGODB_URI=mongodb://mongo:27017/test
     depends_on:
-     - mongo
+      - mongo
+
+  nginx:
+    image: nginx-image # Build the NGINX container using your Dockerfile-nginx
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    ports:
+      - "80:80" # Expose NGINX on port 80
+    depends_on:
+      - node-app
